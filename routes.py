@@ -3,7 +3,7 @@ from app import app, db
 from models import User, Transaction
 import requests
 
-API_KEY = 'your_exchange_rate_api_key'
+API_KEY = 'd6058b00ce51054f8ace1c2c'
 API_URL = 'https://v6.exchangerate-api.com/v6/{}/latest/USD'.format(API_KEY)
 
 @app.route('/convert', methods=['GET'])
