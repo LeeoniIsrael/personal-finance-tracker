@@ -1,3 +1,4 @@
 class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///finance.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    EXCHANGE_RATE_API_KEY = 'd6058b00ce51054f8ace1c2c'
