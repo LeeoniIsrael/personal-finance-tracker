@@ -36,11 +36,30 @@ def convert_currency():
     from_currency = request.args.get('from', type=str)
     to_currency = request.args.get('to', type=str)
 
-    api_key = Config.EXCHANGE_RATE_API_KEY
-    url = f'https://api.exchangeratesapi.io/latest?access_key={api_key}&base={from_currency}&symbols={to_currency}'
-    response = requests.get(url)
-    data = response.json()
-    rate = data['rates'][to_currency]
+    api_key = Config.EXCHANGE_RATE_API_KEY  # Replace with your actual API key
+    url = f'https://api.exchangeratesapi.io/v1/convert?access_key={api_key}&from={from_currency}&to={to_currency}&amount={amount}'
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        if response.status_code == 200 and data['success']:
+            converted_amount = data['result']
+            return jsonify({
+                'success': True,
+                'from': from_currency,
+                'to': to_currency,
+                'amount': amount,
+                'converted_amount': converted_amount
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to convert currency. Check your parameters.'
+            }), 400
 
-    converted_amount = amount * rate
-    return jsonify({'converted_amount': converted_amount, 'rate': rate})
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'success': False,
+            'error': f'Request failed: {str(e)}'
+        }), 500

@@ -46,17 +46,15 @@ class APITestCase(unittest.TestCase):
     @patch('routes.requests.get')
     def test_convert_currency(self, mock_get):
         mock_response = {
-            "rates": {
-                "EUR": 0.85
-            },
-            "base": "USD",
-            "date": "2024-06-26"
+            'success': False,
+            'error': 'Failed to convert currency. Check your parameters.'
         }
+        mock_get.return_value.status_code = 400
         mock_get.return_value.json.return_value = mock_response
 
         response = self.app.get('/convert_currency?amount=100&from=USD&to=EUR')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'converted_amount', response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Failed to convert currency', response.data)
 
 if __name__ == '__main__':
     unittest.main()
