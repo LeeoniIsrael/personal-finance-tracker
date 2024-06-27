@@ -32,24 +32,15 @@ def get_transactions():
 
 @app.route('/convert_currency', methods=['GET'])
 def convert_currency():
-    amount = float(request.args.get('amount', 0))
-    from_currency = request.args.get('from', 'USD')
-    to_currency = request.args.get('to', 'EUR')
+    amount = request.args.get('amount', type=float)
+    from_currency = request.args.get('from', type=str)
+    to_currency = request.args.get('to', type=str)
 
-    url = f'https://api.exchangeratesapi.io/latest?base={from_currency}&symbols={to_currency}'
+    api_key = Config.EXCHANGE_RATE_API_KEY
+    url = f'https://api.exchangeratesapi.io/latest?access_key={api_key}&base={from_currency}&symbols={to_currency}'
     response = requests.get(url)
     data = response.json()
-
-    if 'rates' not in data or to_currency not in data['rates']:
-        return jsonify({"error": "Conversion rate not available"}), 400
-
     rate = data['rates'][to_currency]
+
     converted_amount = amount * rate
-
-    return jsonify({
-        "from": from_currency,
-        "to": to_currency,
-        "amount": amount,
-        "converted_amount": converted_amount
-    }), 200
-
+    return jsonify({'converted_amount': converted_amount, 'rate': rate})
