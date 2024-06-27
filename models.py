@@ -1,22 +1,11 @@
 from app import db
 
-# Define the User and Transaction models here
-
-# User Model
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-
-    transactions = db.relationship('Transaction', backref='user', lazy=True)
-
-# Transaction Model
-
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Numeric, unique=True, nullable=False)
-    category = db.Column(db.String, unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(3), nullable=False)
+    type = db.Column(db.String(10), nullable=False)  # 'income' or 'expense'
+    description = db.Column(db.String(255))
 
-
+    def __repr__(self):
+        return f'<Transaction {self.description} - {self.amount} {self.currency}>'

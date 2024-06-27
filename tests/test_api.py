@@ -1,34 +1,62 @@
 import unittest
+from unittest.mock import patch
 from app import app, db
-from models import User, Transaction
+from models import Transaction
 
 class APITestCase(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         self.app = app.test_client()
+        
+        # Push application context
+        self.app_context = app.app_context()
+        self.app_context.push()
+
         db.create_all()
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-
-    def test_add_user(self):
-        response = self.app.post('/users', json={'username': 'testuser', 'email': 'testuser@example.com'})
-        self.assertEqual(response.status_code, 201)
+        
+        # Pop application context
+        self.app_context.pop()
 
     def test_add_transaction(self):
-        self.app.post('/users', json={'username': 'testuser', 'email': 'testuser@example.com'})
-        response = self.app.post('/transactions', json={'amount': 100, 'category': 'food', 'user_id': 1})
+        response = self.app.post('/add_transaction', json={
+            'amount': 100.0,
+            'currency': 'USD',
+            'type': 'income',
+            'description': 'Salary'
+        })
         self.assertEqual(response.status_code, 201)
+        self.assertIn(b'Transaction added successfully', response.data)
 
     def test_get_transactions(self):
+        self.app.post('/add_transaction', json={
+            'amount': 100.0,
+            'currency': 'USD',
+            'type': 'income',
+            'description': 'Salary'
+        })
         response = self.app.get('/transactions')
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Salary', response.data)
 
-    def test_convert_currency(self):
-        response = self.app.get('/convert?amount=100&from=USD&to=EUR')
+    @patch('routes.requests.get')
+    def test_convert_currency(self, mock_get):
+        mock_response = {
+            "rates": {
+                "EUR": 0.85
+            },
+            "base": "USD",
+            "date": "2024-06-26"
+        }
+        mock_get.return_value.json.return_value = mock_response
+
+        response = self.app.get('/convert_currency?amount=100&from=USD&to=EUR')
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b'converted_amount', response.data)
 
 if __name__ == '__main__':
     unittest.main()
