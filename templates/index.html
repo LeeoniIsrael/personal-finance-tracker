@@ -1,102 +1,187 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/style/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
 </head>
+
 <body>
 
-<h2>Coin:Flipper</h2>
-<p>Choose your function:</p>
+    <h2>Coin:Flipper</h2>
+    <p>Choose your function:</p>
 
-<div class="tab">
-  <button class="tablinks" onclick="openCity(event, 'add')">Add Transaction</button>
-  <form action="/transactions" method="post">
-  <button class="tablinks" onclick="openCity(event, 'view')">View Transactions</button>
-</form>
-  <button class="tablinks" onclick="openCity(event, 'exchange')">Exchange Currencies</button>
-</div>
+    <div class="tab">
 
-<div id="add" class="tabcontent">
-  <h3>Add a new Transaction</h3>
-  <p>
-    <form action="/add_transaction" method="post">
-    <label>Amount: </label>
-    <input type="number id="amount"> <br>
-    <label>Currency: </label>
-    <input type="text"> <br>
-    <label>Type: </label>
-    <input type="text"> <br>
-    <label>Notes: </label> 
-    <input type="text"> <br>
-    <input type="submit" value="Submit">
-</form>
-  </p>
-</div>
+        <button class="tablinks" onclick="openCity(event, 'add')">Add Transaction</button>
+        <button class="tablinks" onclick="openCity(event, 'view')">View Transactions</button>
+        <button class="tablinks" onclick="openCity(event, 'exchange')">Exchange Currencies</button>
 
-<div id="view" class="tabcontent">
-  <h3>View Transaction History</h3>
-  <p>Here are all your transactions:</p> 
-  {% for j in range(0, result|length) %}
-  {{ result[j] }}
-  {% endfor %}
-  <div id="dataDisplay">
-    <!-- JSON data will be displayed here -->
-     
-</div>
-<script>document.addEventListener("DOMContentLoaded", function () {
-    fetch('data.json')
-        .then(response => response.json())
-        .then(data => {
-            const dataDisplay = document.getElementById("dataDisplay");
+    </div>
 
-            // Create HTML elements to display the JSON data
-            const nameElement = document.createElement("p");
-            nameElement.textContent = "Name: " + data.name;
+    <div id="add" class="tabcontent">
+        <h3>Add a new Transaction</h3>
+        <form action='/['add']' method="post" id="dataForm" enctype="multipart/form-data">
+            <label for="amount">Amount:*</label>
+            <input type="number" step="0.01" id="amount" name="amount" required> <br>
+            <label for="currency">Currency:*</label>
+            <input type="text" id="currency" name="currency" required> <br>
+            <label for="type">Type:*</label>
+            <input type="text" id="type" name="type" required> <br>
+            <label for="description">Notes:*</label>
+            <input type="text" id="description" name="description" required> <br>
+          <input type="button" onclick="convertToJson()" value="Submit">
+            <input type="reset" value="Reset">
+        </form>
+        {{ slay }}
+    </div>
 
-            const ageElement = document.createElement("p");
-            ageElement.textContent = "Age: " + data.age;
+    <script>
+        function convertToJson() {
+            let form = document.getElementById("dataForm");
+            let formData = {};
 
-            const cityElement = document.createElement("p");
-            cityElement.textContent = "City: " + data.city;
+            // Loop through form elements
+            for (let i = 0; i < form.elements.length; i++) {
+                let element = form.elements[i];
 
-            // Append the elements to the "dataDisplay" div
-            dataDisplay.appendChild(nameElement);
-            dataDisplay.appendChild(ageElement);
-            dataDisplay.appendChild(cityElement);
-        })
-        .catch(error => console.error("Error fetching JSON data:", error));
-});</script>
-</div>
+                // Skip submit button
+                if (element.type !== "button" && element.type !== "submit") {
+                    formData[element.name] = element.value;
+                }
+                
+            }
 
-<div id="exchange" class="tabcontent">
-  <h3>Currency Exhange</h3>
-  <form action="/convert_currency" method="post">
-    <label>Amount: </label>
-    <input type="number"> <br>
-    <label>From: </label>
-    <input type="text"> <br>
-    <label>To: </label>
-    <input type="text"> <br>
-    <input type="submit" value="Submit">
-</form>
-</div>
+            // Convert formData object to JSON string
+            let jsonData = JSON.stringify(formData, null, 2); // Using null, 2 for pretty printing
+            let jsonOutput = document.getElementById("jsonOutput");
 
-<script>
-function openCity(evt, cityName) {
-  var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
-  }
-  document.getElementById(cityName).style.display = "block";
-  evt.currentTarget.className += " active";
-}
-</script>
-   
+            // Display JSON string in a <pre> tag for clarity
+            //jsonOutput.innerHTML = "<pre>" + jsonData + "</pre>";
+            sendJsonToPython(formData);
+        }
+        function sendJsonToPython(data) {
+            fetch('/user_add', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response from server:", data);
+                    // Handle response from server if needed
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    // Handle errors if any
+                });
+        }
+    </script>
+
+    <div id="view" class="tabcontent">
+        <h3>View Transaction History</h3>
+        <p>{{ msg }}</p>
+        <table>
+            <tr>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            {% for i in range(0, history|length) %}
+            <tr>
+                <td> {{ history[i]['amount'] }}</td>
+                <td> {{ history[i]['currency'] }}</td>
+                <td> {{ history[i]['type'] }}</td>
+                <td> {{ history[i]['description'] }}</td>
+
+            </tr>
+            {% endfor %}
+        </table>
+
+
+
+        <div id="dataDisplay">
+            <!-- JSON data will be displayed here -->
+        </div>
+    </div>
+
+    <div id="exchange" class="tabcontent">
+        <h3>Currency Exhange</h3>
+        <form action="/convert_currency" method="post" id="dataForm2" enctype="multipart/form-data">
+            <label>Amount:* </label>
+            <input type="number" name="amount" id="amount" required > <br>
+            <label>From:* </label>
+            <input type="text" name="from" id="from" required> <br>
+            <label>To:* </label>
+            <input type="text" name="to" id="to" required> <br>
+            <input type="button" onclick="convertToJson()" value="Submit">
+            <input type="reset" value="Reset">
+        </form>
+        {{ slay }} {{ amt }}
+    </div>
+
+    <script>
+        function convertToJson() {
+            let form = document.getElementById("dataForm2");
+            let formData = {};
+
+            // Loop through form elements
+            for (let i = 0; i < form.elements.length; i++) {
+                let element = form.elements[i];
+
+                // Skip submit button
+                if (element.type !== "button" && element.type !== "submit") {
+                    formData[element.name] = element.value;
+                }
+                
+            }
+
+            // Convert formData object to JSON string
+            let jsonData = JSON.stringify(formData, null, 2); // Using null, 2 for pretty printing
+            let jsonOutput = document.getElementById("jsonOutput");
+
+            // Display JSON string in a <pre> tag for clarity
+            //jsonOutput.innerHTML = "<pre>" + jsonData + "</pre>";
+            sendJsonToPython(formData);
+        }
+        function sendJsonToPython(data) {
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response from server:", data);
+                    // Handle response from server if needed
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    // Handle errors if any
+                });
+        }
+
+        function openCity(evt, cityName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(cityName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+
 </body>
-</html> 
+
+</html>
