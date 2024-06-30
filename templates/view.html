@@ -1,60 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body {font-family: Arial;}
-
-/* Style the tab */
-.tab {
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
-}
-
-/* Style the buttons inside the tab */
-.tab button {
-  background-color: inherit;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  font-size: 17px;
-}
-
-/* Change background color of buttons on hover */
-.tab button:hover {
-  background-color: #ddd;
-}
-
-/* Create an active/current tablink class */
-.tab button.active {
-  background-color: #ccc;
-}
-
-/* Style the tab content */
-.tabcontent {
-  display: none;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-top: none;
-}
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Coin:Flipper</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        h2, h3 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .tab {
+            display: flex;
+            justify-content: center;
+            background-color: #4CAF50;
+            padding: 10px;
+        }
+        .tab button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: background-color 0.3s;
+            font-size: 17px;
+            margin: 0 2px;
+        }
+        .tab button:hover {
+            background-color: #45a049;
+        }
+        .tab button.active {
+            background-color: #3e8e41;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: white;
+            margin: 20px auto;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
 
 <h2>Coin:Flipper</h2>
 <h3>Click on any of the following options to start</h3>
 <div class="tab">
-    <button class="tablinks" id="defaultOpen"><a href="/user_add">Add Transaction</a></button>
-    <button class="tablinks" onclick="openCity(event, 'view')",><a href="/user_view">View Transactions</a></button>
-    <button class="tablinks" onclick="openCity(event, 'exchange')"><a href="/user_convert">Currency Exchange</a></button>
+    <button class="tablinks" onclick="openTab(event, 'add')">Add Transaction</button>
+    <button class="tablinks" onclick="openTab(event, 'view')">View Transactions</button>
+    <button class="tablinks" onclick="openTab(event, 'exchange')">Currency Exchange</button>
 </div>
 
-
-
+<div id="view" class="tabcontent">
     <h3>View Transaction History</h3>
     <table>
         <tr>
@@ -69,12 +88,26 @@ body {font-family: Arial;}
             <td> {{ history[i]['currency'] }}</td>
             <td> {{ history[i]['type'] }}</td>
             <td> {{ history[i]['description'] }}</td>
-
         </tr>
         {% endfor %}
     </table>
+</div>
 
+<script>
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
 
-   
 </body>
-</html> 
+</html>
