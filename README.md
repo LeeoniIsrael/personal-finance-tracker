@@ -1,4 +1,4 @@
-📊 Welcome to my GitHub repository showcasing a robust Personal Finance Tracker. This project is designed to empower users with comprehensive tools for managing their financial activities effectively. With a commitment to simplicity and functionality, this tracker encapsulates modern web technologies and best practices, spanning over [insert lines of code] lines.
+📊 Welcome to my GitHub repository showcasing a robust Personal Finance Tracker. This project is designed to empower users with comprehensive tools for managing their financial activities effectively. With a commitment to simplicity and functionality, this tracker encapsulates modern web technologies and best practices.
 
 Key Features
 
